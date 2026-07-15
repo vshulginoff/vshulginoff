@@ -97,7 +97,7 @@
 
     <div id="ui">
         <label class="full-width">Текст (Grid Text)
-            <input type="text" id="inpText" value="BANG">
+            <input type="text" id="inpText" value="ВведитеТекст">
         </label>
         
         <label>Размер сетки (Size)
@@ -257,7 +257,7 @@
             ctx.fillStyle = "#000";
             ctx.fillRect(0, 0, width, height);
 
-            const word = document.getElementById('inpText').value || "ВведиТекст";
+            const word = document.getElementById('inpText').value || "ВведитеТекст";
             const fontSize = parseInt(document.getElementById('inpSize').value) || 45;
             const noiseScale = parseFloat(document.getElementById('inpScale').value);
             const speed = parseFloat(document.getElementById('inpSpeed').value);
