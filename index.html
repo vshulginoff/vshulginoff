@@ -116,6 +116,7 @@
             <input type="range" id="inpSpeed" min="0" max="100" step="1" value="30">
         </label>
 
+        <button class="full-width" onclick="toggleFullScreen()" id="btnFullscreen">На весь экран</button>
         <button class="full-width" onclick="toggleUI()">Запись экрана (Play)</button>
         <span class="full-width" style="font-size: 10px; text-align: center; color: #666;">Нажми любую кнопку на клавиатуре, чтобы вернуть меню</span>
     </div>
@@ -213,8 +214,42 @@
             }
         }
 
+        // Возврат меню по любой кнопке клавиатуры
         window.addEventListener('keydown', () => {
             if (isRecording) toggleUI();
+        });
+
+        // --- ПОЛНОЭКРАННЫЙ РЕЖИМ ---
+        function toggleFullScreen() {
+            const btn = document.getElementById('btnFullscreen');
+            
+            if (!document.fullscreenElement) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
+                    document.documentElement.msRequestFullscreen();
+                }
+                btn.innerText = "Выйти из полного экрана";
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+                btn.innerText = "На весь экран";
+            }
+        }
+
+        // Слушаем выход из полного экрана по Esc
+        document.addEventListener('fullscreenchange', () => {
+            const btn = document.getElementById('btnFullscreen');
+            if (!document.fullscreenElement) {
+                btn.innerText = "На весь экран";
+            }
         });
 
         // --- ГЛАВНЫЙ ЦИКЛ РЕНДЕРА ---
