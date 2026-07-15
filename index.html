@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kinetic Typography - Opacity Map</title>
+    
+    <!-- Подключение библиотеки VK Bridge -->
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap');
 
@@ -172,14 +176,13 @@
                 return 70.0 * (n0 + n1 + n2);
             }
 
-            // Фрактальный шум (Суммирование октав для создания "облаков")
             fBm(x, y, octaves) {
                 let value = 0; let amp = 0.5; let freq = 1.0;
                 for (let i = 0; i < octaves; i++) {
                     value += this.noise2D(x * freq, y * freq) * amp;
                     freq *= 2.0; amp *= 0.5;
                 }
-                return value; // Вернет примерно от -1 до 1
+                return value; 
             }
         }
 
@@ -210,25 +213,21 @@
             }
         }
 
-        // Возврат меню по любой кнопке клавиатуры
         window.addEventListener('keydown', () => {
             if (isRecording) toggleUI();
         });
 
         // --- ГЛАВНЫЙ ЦИКЛ РЕНДЕРА ---
         function draw() {
-            // Очистка экрана черным
             ctx.fillStyle = "#000";
             ctx.fillRect(0, 0, width, height);
 
-            // Читаем параметры из UI
             const word = document.getElementById('inpText').value || "BANG";
             const fontSize = parseInt(document.getElementById('inpSize').value) || 45;
             const noiseScale = parseFloat(document.getElementById('inpScale').value);
             const speed = parseFloat(document.getElementById('inpSpeed').value);
             const contrast = parseFloat(document.getElementById('inpContrast').value);
 
-            // Двигаем "Evolution" шума
             globalTime += (speed / 10000); 
 
             ctx.font = `900 ${fontSize}px "Montserrat"`;
@@ -236,36 +235,25 @@
             ctx.textBaseline = 'middle';
             ctx.fillStyle = "#fff";
 
-            // В Particle Playground шрифт моноширинный. Высчитываем строгую сетку:
             const cellW = fontSize * 0.75; 
             const cellH = fontSize * 1.0;  
 
             const cols = Math.ceil(width / cellW) + 1;
             const rows = Math.ceil(height / cellH) + 1;
 
-            // Отрисовка кинетической сетки
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
-                    // Глобальный индекс буквы в непрерывной строке (как в видео)
                     let index = r * cols + c;
                     let char = word[index % word.length];
                     
                     let x = c * cellW;
                     let y = r * cellH;
 
-                    // 1. Читаем значение шума для этих координат. Добавляем смещение времени, чтобы облака двигались
                     let n = simplex.fBm(x * noiseScale + globalTime * 10, y * noiseScale - globalTime * 15, 3);
-                    
-                    // 2. Переводим значение из [-1..1] в [0..1]
                     n = n * 0.5 + 0.5;
-                    
-                    // 3. Применяем кривую контрастности (как Levels в After Effects)
                     n = (n - 0.5) * contrast + 0.5;
-                    
-                    // 4. Ограничиваем альфа-канал и применяем к букве
                     let alpha = Math.max(0, Math.min(1, n));
 
-                    // Если буква полностью невидима, пропускаем отрисовку для оптимизации FPS
                     if (alpha > 0.01) {
                         ctx.globalAlpha = alpha;
                         ctx.fillText(char, x, y);
@@ -273,11 +261,19 @@
                 }
             }
             
-            ctx.globalAlpha = 1; // Сброс альфы
+            ctx.globalAlpha = 1; 
             requestAnimationFrame(draw);
         }
 
-        // Старт
+        // --- ИНИЦИАЛИЗАЦИЯ VK BRIDGE И СТАРТ ---
+        vkBridge.send('VKWebAppInit')
+            .then((data) => {
+                console.log('VK Bridge успешно инициализирован');
+            })
+            .catch((error) => {
+                console.error('Ошибка инициализации VK Bridge', error);
+            });
+
         draw();
     </script>
 </body>
